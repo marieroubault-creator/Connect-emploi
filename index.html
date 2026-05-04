@@ -1,186 +1,150 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Swipe entreprises Saint-Malo</title>
-  <style>
-    :root{
-      --text-primary:#1D1E3C;
-      --text-secondary:#283276;
-      --primary:#406BDE;
-      --bg:#DBE3FF;
-      --like:#2ecc71;
-      --nope:#e74c3c;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Match avec ton emploi</title>
 
-      --b1:#DBE3FF;
-      --b2:#F0E3FA;
-      --b3:#FCE5F2;
-      --b4:#FAD9D6;
-      --b5:#FFF0C7;
-    }
+<style>
+:root{
+  --text-primary:#1D1E3C;
+  --text-secondary:#283276;
+  --primary:#406BDE;
+  --bg:#DBE3FF;
+}
 
-    *{
-      box-sizing:border-box;
-      font-family:"Marianne", Verdana, Tahoma, sans-serif;
-    }
+*{
+  box-sizing:border-box;
+  font-family:"Marianne", Verdana, Tahoma, sans-serif;
+}
 
-    body{
-      margin:0;
-      background:var(--bg);
-      height:100vh;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-    }
+body{
+  margin:0;
+  background:var(--bg);
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  touch-action:none; /* 🔥 CRUCIAL TABLETTE */
+}
 
-    /* HEADER */
-    .header1{
-      background:#B0BFF0;
-      color:#1D1E3C;
-      text-align:center;
-      padding:12px;
-      font-weight:700;
-      font-size:22px;
-      letter-spacing:0.3px;
-      z-index:2;
-    }
+/* HEADER */
+.header-wrap{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:10;
+}
 
-    .header2{
-      background:white;
-      color:var(--primary);
-      text-align:center;
-      padding:10px;
-      font-weight:700;
-      font-size:18px;
-      border-bottom:1px solid #eee;
-      z-index:2;
-    }
+.header1{
+  background:#B0BFF0;
+  color:#1D1E3C;
+  text-align:center;
+  padding:12px;
+  font-weight:700;
+  font-size:22px;
+}
 
-    /* BUBBLES */
-    .bubble{
-      position:absolute;
-      bottom:-80px;
-      border-radius:50%;
-      opacity:0.55;
-      animation:rise linear infinite;
-      filter:blur(0.2px);
-    }
+.header2{
+  background:white;
+  color:var(--primary);
+  text-align:center;
+  padding:10px;
+  font-weight:700;
+}
 
-    @keyframes rise{
-      0%{transform:translateY(0);opacity:0.7;}
-      100%{transform:translateY(-120vh);opacity:0;}
-    }
+.spacer{height:90px;}
 
-    /* FILTRES */
-    .filters{
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      padding:10px;
-      z-index:2;
-    }
+.filters{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  padding:10px;
+}
 
-    .filters button{
-      border:none;
-      padding:10px 14px;
-      border-radius:20px;
-      cursor:pointer;
-      background:white;
-      color:var(--text-primary);
-      font-weight:bold;
-    }
+.filters button{
+  border:none;
+  padding:10px 14px;
+  border-radius:20px;
+  background:white;
+  font-weight:bold;
+}
 
-    .filters button.active{
-      background:var(--primary);
-      color:white;
-    }
+.filters .active{
+  background:var(--primary);
+  color:white;
+}
 
-    .screen{
-      flex:1;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      position:relative;
-      z-index:2;
-    }
+.screen{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-    .stack{
-      position:relative;
-      width:320px;
-      height:520px;
-    }
+.stack{
+  position:relative;
+  width:320px;
+  height:520px;
+}
 
-    .card{
-      position:absolute;
-      width:100%;
-      height:100%;
-      background:white;
-      border-radius:20px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.2);
-      overflow:hidden;
-      transition:transform 0.3s ease;
-    }
+.card{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:white;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  overflow:hidden;
+  touch-action:none;
+}
 
-    .card img{
-      width:100%;
-      height:70%;
-      object-fit:cover;
-    }
+.card img{
+  width:100%;
+  height:70%;
+  object-fit:cover;
+}
 
-    .content{
-      padding:15px;
-    }
+.content{padding:15px;}
 
-    h2{margin:0;color:var(--text-primary);}
-    p{color:var(--text-secondary);}
+.match{
+  display:none;
+  text-align:center;
+  padding:40px;
+}
 
-    /* FOOTER */
-    .footer{
-      background:white;
-      text-align:center;
-      padding:10px;
-      font-size:12px;
-      color:var(--primary);
-      border-top:1px solid #eee;
-      z-index:2;
-    }
+.match h1{
+  font-size:38px;
+  font-weight:800;
+}
 
-  </style>
+.match a{
+  display:inline-block;
+  margin-top:10px;
+  padding:12px 20px;
+  background:var(--primary);
+  color:white;
+  border-radius:10px;
+}
+
+.footer{
+  background:white;
+  text-align:center;
+  padding:10px;
+  font-size:12px;
+  color:var(--primary);
+}
+</style>
 </head>
+
 <body>
 
-<div class="header1">Match avec ton emploi</div>
-<div class="header2">France Travail et la route du Rhum</div>
+<div class="header-wrap">
+  <div class="header1">Match avec ton emploi</div>
+  <div class="header2">France Travail et la route du Rhum</div>
+</div>
 
-<!-- BUBBLES -->
-<script>
-const colors=[
-"#DBE3FF","#F0E3FA","#FCE5F2","#FAD9D6","#FFF0C7",
-"#B0BFF0","#D9C9E5","#F0C9DE","#F5A39E",
-"#406BDE","#69408C","#EB94C2","#EB6366","#FFCC52",
-"#1D1E3C","#283276"
-];
+<div class="spacer"></div>
 
-for(let i=0;i<25;i++){
-  let b=document.createElement("div");
-  b.className="bubble";
-
-  const size = 10 + Math.random()*60;
-  b.style.width = size + "px";
-  b.style.height = size + "px";
-
-  b.style.left = Math.random()*100 + "vw";
-  b.style.background = colors[Math.floor(Math.random()*colors.length)];
-
-  b.style.animationDuration = (6 + Math.random()*12) + "s";
-  b.style.animationDelay = (Math.random()*5) + "s";
-
-  document.body.appendChild(b);
-}
-</script>
-
-<!-- FILTRES -->
 <div class="filters">
   <button class="active" onclick="setFilter('all')">Tous</button>
   <button onclick="setFilter('restauration')">Restauration</button>
@@ -192,59 +156,129 @@ for(let i=0;i<25;i++){
   <div class="stack" id="stack"></div>
 </div>
 
-<div class="footer">France Travail 2026 | Dites-le nous une fois</div>
+<div class="match" id="match">
+  <div style="font-size:60px">🤝</div>
+  <h1 id="matchText"></h1>
+
+  <a href="https://candidat.francetravail.fr/" target="_blank">
+    Se connecter à France Travail
+  </a><br>
+
+  <a id="companyLink" href="#" target="_blank">
+    Voir le site entreprise
+  </a><br><br>
+
+  <button onclick="restart()">Retour</button>
+</div>
+
+<div class="footer">
+France Travail 2026 | Dites-le nous une fois
+</div>
 
 <script>
 const companies=[
-  {name:"Mytilimer",desc:"Industrie maritime",img:"img/mytilimer.JPG",tag:"industrie"},
-  {name:"Biscuits Joyeux",desc:"Biscuiterie artisanale",img:"img/biscuits.jpg",tag:"restauration"},
-  {name:"Alternance Pro",desc:"Centre de formation",img:"img/alt.jpg",tag:"alternance"}
+  {name:"Mytilimer",desc:"Industrie maritime",img:"img/mytilimer.jpg",tag:"industrie",url:"https://www.mytilimer.fr"},
+  {name:"Biscuits Joyeux",desc:"Biscuiterie artisanale",img:"img/biscuits.jpg",tag:"restauration",url:"https://www.biscuits-joyeux.fr"},
+  {name:"Alternance Pro",desc:"Centre de formation",img:"img/alt.jpg",tag:"alternance",url:"https://www.alternance-pro.fr"}
 ];
 
 let filter="all";
-let stack=document.getElementById("stack");
-
-function getFiltered(){
-  return companies.filter(c=>filter==="all"||c.tag===filter);
-}
+const stack=document.getElementById("stack");
 
 function render(){
-  const list=getFiltered();
+  const list=companies.filter(c=>filter==="all"||c.tag===filter);
   stack.innerHTML="";
 
-  list.slice(0,3).reverse().forEach((c,i)=>{
-    let card=document.createElement("div");
+  list.slice(0,4).reverse().forEach((c,i)=>{
+
+    const card=document.createElement("div");
     card.className="card";
     card.style.zIndex=10-i;
+
+    // profondeur
     card.style.transform=`scale(${1-i*0.05}) translateY(${i*10}px)`;
+    card.style.filter=`blur(${i*1.5}px)`;
+    card.style.opacity=1-i*0.1;
 
     card.innerHTML=`
-      <img src="${c.img}" onerror="this.src='https://via.placeholder.com/400x500?text=Image+introuvable'" />
+      <img src="${c.img}" onerror="this.src='https://via.placeholder.com/400x500'">
       <div class="content">
         <h2>${c.name}</h2>
         <p>${c.desc}</p>
       </div>
     `;
 
-    let startX=0,currentX=0;
+    let startX=0, currentX=0, velocity=0, lastX=0, lastT=0, dragging=false;
 
-    card.addEventListener("pointerdown",e=>startX=e.clientX);
+    card.addEventListener("pointerdown",e=>{
+      startX=e.clientX;
+      lastX=startX;
+      lastT=Date.now();
+      dragging=true;
+      card.setPointerCapture(e.pointerId);
+    });
+
     card.addEventListener("pointermove",e=>{
-      if(startX===0)return;
+      if(!dragging) return;
+      e.preventDefault();
+
       currentX=e.clientX-startX;
-      card.style.transform=`translateX(${currentX}px) rotate(${currentX/15}deg)`;
+
+      let now=Date.now();
+      velocity=(e.clientX-lastX)/(now-lastT);
+      lastX=e.clientX;
+      lastT=now;
+
+      card.style.transform=`translateX(${currentX}px) rotate(${currentX/18}deg)`;
     });
 
-    card.addEventListener("pointerup",()=>{
-      if(currentX>100){card.style.transform="translateX(500px) rotate(20deg)";setTimeout(()=>{companies.push(companies.shift());render();},200);}
-      else if(currentX<-100){card.style.transform="translateX(-500px) rotate(-20deg)";setTimeout(()=>{companies.push(companies.shift());render();},200);}
-      else card.style.transform=`scale(${1-i*0.05}) translateY(${i*10}px)`;
+    const end=()=>{
+      if(!dragging) return;
+      dragging=false;
 
-      startX=0;currentX=0;
-    });
+      let finalX=currentX + velocity*150;
+
+      if(finalX>120){
+        card.style.transform="translateX(800px) rotate(30deg)";
+        setTimeout(()=>showMatch(c),200);
+      }
+      else if(finalX<-120){
+        card.style.transform="translateX(-800px) rotate(-30deg)";
+        setTimeout(()=>{
+          companies.push(companies.shift());
+          render();
+        },200);
+      }
+      else{
+        card.style.transition="transform 0.3s";
+        card.style.transform="translateX(0)";
+        setTimeout(()=>card.style.transition="",300);
+      }
+
+      currentX=0;
+    };
+
+    card.addEventListener("pointerup",end);
+    card.addEventListener("pointercancel",end);
 
     stack.appendChild(card);
   });
+}
+
+function showMatch(c){
+  document.querySelector(".screen").style.display="none";
+  document.querySelector(".filters").style.display="none";
+  document.getElementById("match").style.display="block";
+
+  document.getElementById("matchText").textContent="Match avec "+c.name;
+  document.getElementById("companyLink").href=c.url;
+}
+
+function restart(){
+  document.getElementById("match").style.display="none";
+  document.querySelector(".screen").style.display="flex";
+  document.querySelector(".filters").style.display="flex";
+  render();
 }
 
 function setFilter(f){
