@@ -8,7 +8,6 @@
 <style>
 :root{
   --text-primary:#1D1E3C;
-  --text-secondary:#283276;
   --primary:#406BDE;
   --bg:#DBE3FF;
 }
@@ -25,7 +24,24 @@ body{
   overflow:hidden;
   display:flex;
   flex-direction:column;
-  touch-action:none; /* 🔥 CRUCIAL TABLETTE */
+  touch-action:none;
+}
+
+/* 🎈 BULLES BACKGROUND */
+.bubble{
+  position:absolute;
+  bottom:-100px;
+  border-radius:50%;
+  opacity:0.5;
+  animation:rise linear infinite;
+  z-index:0;
+  pointer-events:none;
+  filter: blur(1px);
+}
+
+@keyframes rise{
+  0%{transform:translateY(0); opacity:0.6;}
+  100%{transform:translateY(-120vh); opacity:0;}
 }
 
 /* HEADER */
@@ -37,23 +53,24 @@ body{
 
 .header1{
   background:#B0BFF0;
-  color:#1D1E3C;
   text-align:center;
   padding:12px;
   font-weight:700;
   font-size:22px;
+  color:#1D1E3C;
 }
 
 .header2{
   background:white;
-  color:var(--primary);
   text-align:center;
   padding:10px;
   font-weight:700;
+  color:var(--primary);
 }
 
 .spacer{height:90px;}
 
+/* FILTERS */
 .filters{
   display:flex;
   gap:10px;
@@ -74,47 +91,80 @@ body{
   color:white;
 }
 
+/* SCREEN */
 .screen{
   flex:1;
   display:flex;
   justify-content:center;
   align-items:center;
+  z-index:2;
 }
 
+/* STACK */
 .stack{
+  width:90vw;
+  max-width:420px;
+  height:75vh;
+  max-height:700px;
   position:relative;
-  width:320px;
-  height:520px;
+  z-index:2;
 }
 
+/* CARD */
 .card{
   position:absolute;
   width:100%;
   height:100%;
-  background:white;
   border-radius:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.2);
   overflow:hidden;
+  background:white;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
   touch-action:none;
 }
 
+/* IMAGE FULL */
 .card img{
   width:100%;
-  height:70%;
+  height:100%;
   object-fit:cover;
+  position:absolute;
+  top:0;
+  left:0;
 }
 
-.content{padding:15px;}
+/* TEXT OVERLAY */
+.content{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  padding:20px;
+  background:linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0));
+}
 
+.content h2{
+  margin:0;
+  color:white;
+  text-shadow:0 2px 6px rgba(0,0,0,0.5);
+}
+
+.content p{
+  margin-top:5px;
+  color:white;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+}
+
+/* MATCH */
 .match{
   display:none;
   text-align:center;
   padding:40px;
+  z-index:3;
 }
 
 .match h1{
   font-size:38px;
   font-weight:800;
+  color:var(--text-primary);
 }
 
 .match a{
@@ -124,20 +174,24 @@ body{
   background:var(--primary);
   color:white;
   border-radius:10px;
+  text-decoration:none;
 }
 
+/* FOOTER */
 .footer{
   background:white;
   text-align:center;
   padding:10px;
   font-size:12px;
   color:var(--primary);
+  z-index:2;
 }
 </style>
 </head>
 
 <body>
 
+<!-- HEADER -->
 <div class="header-wrap">
   <div class="header1">Match avec ton emploi</div>
   <div class="header2">France Travail et la route du Rhum</div>
@@ -145,6 +199,7 @@ body{
 
 <div class="spacer"></div>
 
+<!-- FILTERS -->
 <div class="filters">
   <button class="active" onclick="setFilter('all')">Tous</button>
   <button onclick="setFilter('restauration')">Restauration</button>
@@ -152,10 +207,12 @@ body{
   <button onclick="setFilter('alternance')">Alternance</button>
 </div>
 
+<!-- STACK -->
 <div class="screen">
   <div class="stack" id="stack"></div>
 </div>
 
+<!-- MATCH -->
 <div class="match" id="match">
   <div style="font-size:60px">🤝</div>
   <h1 id="matchText"></h1>
@@ -165,7 +222,7 @@ body{
   </a><br>
 
   <a id="companyLink" href="#" target="_blank">
-    Voir le site entreprise
+    Voir l’entreprise
   </a><br><br>
 
   <button onclick="restart()">Retour</button>
@@ -176,6 +233,30 @@ France Travail 2026 | Dites-le nous une fois
 </div>
 
 <script>
+
+/* 🎈 BULLES */
+const colors=[
+  "#DBE3FF","#F0E3FA","#FCE5F2","#FAD9D6","#FFF0C7",
+  "#B0BFF0","#D9C9E5","#F0C9DE","#F5A39E",
+  "#406BDE","#69408C","#EB94C2","#EB6366","#FFCC52"
+];
+
+for(let i=0;i<25;i++){
+  const b=document.createElement("div");
+  b.className="bubble";
+
+  const size=10+Math.random()*70;
+  b.style.width=size+"px";
+  b.style.height=size+"px";
+  b.style.left=Math.random()*100+"vw";
+  b.style.background=colors[Math.floor(Math.random()*colors.length)];
+  b.style.animationDuration=(6+Math.random()*12)+"s";
+  b.style.animationDelay=(Math.random()*5)+"s";
+
+  document.body.appendChild(b);
+}
+
+/* DATA */
 const companies=[
   {name:"Mytilimer",desc:"Industrie maritime",img:"img/mytilimer.JPG",tag:"industrie",url:"https://www.mytilimer.fr"},
   {name:"Biscuits Joyeux",desc:"Biscuiterie artisanale",img:"img/biscuits.jpg",tag:"restauration",url:"https://www.biscuits-joyeux.fr"},
@@ -185,23 +266,23 @@ const companies=[
 let filter="all";
 const stack=document.getElementById("stack");
 
+/* RENDER */
 function render(){
   const list=companies.filter(c=>filter==="all"||c.tag===filter);
   stack.innerHTML="";
 
-  list.slice(0,4).reverse().forEach((c,i)=>{
+  list.slice(0,5).reverse().forEach((c,i)=>{
 
     const card=document.createElement("div");
     card.className="card";
     card.style.zIndex=10-i;
 
-    // profondeur
     card.style.transform=`scale(${1-i*0.05}) translateY(${i*10}px)`;
-    card.style.filter=`blur(${i*1.5}px)`;
     card.style.opacity=1-i*0.1;
+    card.style.filter=`blur(${i*1.5}px)`;
 
     card.innerHTML=`
-      <img src="${c.img}" onerror="this.src='https://via.placeholder.com/400x500'">
+      <img src="${c.img}" onerror="this.src='https://via.placeholder.com/400x600'">
       <div class="content">
         <h2>${c.name}</h2>
         <p>${c.desc}</p>
@@ -224,7 +305,7 @@ function render(){
 
       currentX=e.clientX-startX;
 
-      let now=Date.now();
+      const now=Date.now();
       velocity=(e.clientX-lastX)/(now-lastT);
       lastX=e.clientX;
       lastT=now;
@@ -239,18 +320,18 @@ function render(){
       let finalX=currentX + velocity*150;
 
       if(finalX>120){
-        card.style.transform="translateX(800px) rotate(30deg)";
+        card.style.transform="translateX(900px) rotate(30deg)";
         setTimeout(()=>showMatch(c),200);
       }
       else if(finalX<-120){
-        card.style.transform="translateX(-800px) rotate(-30deg)";
+        card.style.transform="translateX(-900px) rotate(-30deg)";
         setTimeout(()=>{
           companies.push(companies.shift());
           render();
         },200);
       }
       else{
-        card.style.transition="transform 0.3s";
+        card.style.transition="transform 0.3s ease";
         card.style.transform="translateX(0)";
         setTimeout(()=>card.style.transition="",300);
       }
@@ -265,6 +346,7 @@ function render(){
   });
 }
 
+/* MATCH */
 function showMatch(c){
   document.querySelector(".screen").style.display="none";
   document.querySelector(".filters").style.display="none";
@@ -274,6 +356,7 @@ function showMatch(c){
   document.getElementById("companyLink").href=c.url;
 }
 
+/* RESET */
 function restart(){
   document.getElementById("match").style.display="none";
   document.querySelector(".screen").style.display="flex";
@@ -281,6 +364,7 @@ function restart(){
   render();
 }
 
+/* FILTER */
 function setFilter(f){
   filter=f;
   document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"));
@@ -289,6 +373,7 @@ function setFilter(f){
 }
 
 render();
+
 </script>
 
 </body>
