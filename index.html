@@ -31,16 +31,15 @@ body{
   position:absolute;
   bottom:-100px;
   border-radius:50%;
-  opacity:0.5;
+  opacity:0.35;
   animation:rise linear infinite;
-  z-index:0;
+  z-index:-1;
   pointer-events:none;
-  filter:blur(1px);
 }
 
 @keyframes rise{
-  0%{transform:translateY(0);opacity:0.6;}
-  100%{transform:translateY(-120vh);opacity:0;}
+  0%{transform:translateY(0);}
+  100%{transform:translateY(-120vh);}
 }
 
 /* HEADER */
@@ -53,7 +52,7 @@ body{
 .header1{
   background:#B0BFF0;
   text-align:center;
-  padding:12px;
+  padding:14px;
   font-weight:700;
   font-size:22px;
   color:#1D1E3C;
@@ -62,31 +61,51 @@ body{
 .header2{
   background:white;
   text-align:center;
-  padding:10px;
+  padding:12px;
   font-weight:700;
   color:var(--primary);
 }
 
-.spacer{height:90px;}
+.spacer{height:110px;}
+
+/* ===== CATEGORIES ===== */
+.filters-wrapper{
+  position:relative;
+  margin-bottom:10px;
+}
 
 .filters{
   display:flex;
-  gap:10px;
-  justify-content:center;
-  padding:10px;
+  gap:12px;
+  overflow-x:auto;
+  padding:15px 20px;
+  scroll-behavior:smooth;
 }
+
+.filters::-webkit-scrollbar{display:none;}
 
 .filters button{
   border:none;
-  padding:10px 14px;
-  border-radius:20px;
+  padding:10px 16px;
+  border-radius:25px;
   background:white;
   font-weight:bold;
+  white-space:nowrap;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  flex-shrink:0;
 }
 
 .filters .active{
   background:var(--primary);
   color:white;
+}
+
+/* incitation scroll */
+.scroll-hint{
+  text-align:center;
+  font-size:12px;
+  opacity:0.6;
+  margin-top:-5px;
 }
 
 /* SCREEN */
@@ -123,8 +142,6 @@ body{
   height:100%;
   object-fit:cover;
   position:absolute;
-  top:0;
-  left:0;
 }
 
 /* TEXT */
@@ -134,73 +151,78 @@ body{
   width:100%;
   padding:20px;
   background:linear-gradient(to top, rgba(0,0,0,0.75), transparent);
-  z-index:2;
 }
 
 .content h2,
 .content p{
   color:white;
   margin:0;
-  text-shadow:0 2px 8px rgba(0,0,0,0.6);
 }
 
 /* BADGES */
 .badge{
   position:absolute;
   top:40px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:28px;
+  font-size:26px;
   font-weight:800;
-  padding:10px 16px;
-  border:3px solid;
+  padding:8px 14px;
   border-radius:10px;
   display:none;
   z-index:5;
 }
 
-.badge.like{
+.like-indicator{
+  left:20px;
   color:#2ecc71;
-  border-color:#2ecc71;
-  transform:translateX(-50%) rotate(-15deg);
+  border:2px solid #2ecc71;
 }
 
-.badge.nope{
+.nope-indicator{
+  right:20px;
   color:#e74c3c;
-  border-color:#e74c3c;
-  transform:translateX(-50%) rotate(15deg);
+  border:2px solid #e74c3c;
 }
 
-/* MATCH */
+/* MATCH CINEMA */
 .match{
   display:none;
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at top, #1a1a2e, #000);
+  color:white;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:20;
   text-align:center;
-  padding:40px;
+  padding:20px;
+}
+
+.match.show{
+  display:flex;
+  animation:fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:scale(1.05);}
+  to{opacity:1; transform:scale(1);}
 }
 
 .match h1{
-  font-size:38px;
-  font-weight:900;
-  color:#1D1E3C;
+  font-size:52px;
 }
 
+/* boutons match */
 .match a{
-  display:inline-block;
-  margin-top:10px;
-  padding:12px 20px;
-  background:var(--primary);
-  color:white;
-  border-radius:10px;
-  text-decoration:none;
-}
-
-/* FOOTER */
-.footer{
-  background:white;
+  margin-top:12px;
+  padding:14px 20px;
+  width:260px;
   text-align:center;
-  padding:10px;
-  font-size:12px;
-  color:var(--primary);
+  background:#406BDE;
+  color:white;
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:700;
 }
 </style>
 </head>
@@ -214,190 +236,179 @@ body{
 
 <div class="spacer"></div>
 
-<div class="filters">
-  <button class="active" onclick="setFilter('all')">Tous</button>
-  <button onclick="setFilter('industrie')">Industrie</button>
-  <button onclick="setFilter('restauration')">Restauration</button>
-  <button onclick="setFilter('alternance')">Alternance</button>
+<!-- CATEGORIES -->
+<div class="filters-wrapper">
+  <div class="filters" id="filters">
+    <button class="active" onclick="setFilter('all')">Tous</button>
+    <button onclick="setFilter('aide')">Aide à la personne</button>
+    <button onclick="setFilter('batiment')">Bâtiment</button>
+    <button onclick="setFilter('asso')">Collectivités / asso</button>
+    <button onclick="setFilter('commerce')">Commerce</button>
+    <button onclick="setFilter('gms')">Grande distribution</button>
+    <button onclick="setFilter('hcrb')">HCRB</button>
+    <button onclick="setFilter('industrie')">Industrie</button>
+    <button onclick="setFilter('agri')">Pêche / Agriculture</button>
+    <button onclick="setFilter('cyber')">Sécurité informatique</button>
+    <button onclick="setFilter('transport')">Transport</button>
+    <button onclick="setFilter('interim')">Intérim</button>
+    <button onclick="setFilter('autre')">Autre</button>
+  </div>
 </div>
+
+<div class="scroll-hint">👉 Glisse pour voir toutes les catégories</div>
 
 <div class="screen">
   <div class="stack" id="stack"></div>
 </div>
 
 <div class="match" id="match">
-  <div style="font-size:60px">🤝</div>
-  <h1 id="matchText"></h1>
-
+  <h1 id="matchText">MATCH !</h1>
   <a href="https://recrute.francetravail.fr/page-employeur/" target="_blank">
-    Candidater via France Travail
+    France Travail
   </a>
-
-  <br>
-
   <a id="companyLink" href="#" target="_blank">
-    Voir le site de l’entreprise
+    Entreprise
   </a>
-
-  <br><br>
-
-  <button onclick="restart()">Retour</button>
-</div>
-
-<div class="footer">
-France Travail 2026 | Dites-le nous une fois
+  <button onclick="restart()" style="margin-top:15px;padding:10px 16px;border:none;border-radius:10px;">
+    Retour
+  </button>
 </div>
 
 <script>
 
-/* 🎈 BULLES */
-const colors=["#DBE3FF","#F0E3FA","#FCE5F2","#FAD9D6","#FFF0C7","#406BDE","#EB6366","#FFCC52"];
-
-for(let i=0;i<25;i++){
+/* BULLES */
+for(let i=0;i<20;i++){
   const b=document.createElement("div");
   b.className="bubble";
-
-  const size=10+Math.random()*70;
-  b.style.width=size+"px";
-  b.style.height=size+"px";
+  const s=10+Math.random()*60;
+  b.style.width=s+"px";
+  b.style.height=s+"px";
   b.style.left=Math.random()*100+"vw";
-  b.style.background=colors[Math.floor(Math.random()*colors.length)];
-  b.style.animationDuration=(6+Math.random()*12)+"s";
-
   document.body.appendChild(b);
 }
 
 /* DATA */
 const companies=[
-  {name:"Mytilimer",desc:"Industrie maritime",img:"img/mytilimer.jpg",tag:"industrie",url:"https://recrute.francetravail.fr/page-employeur/"},
-  {name:"Biscuits Joyeux",desc:"Biscuiterie artisanale",img:"img/biscuits.jpg",tag:"restauration",url:"https://recrute.francetravail.fr/page-employeur/"},
-  {name:"Alternance Pro",desc:"Centre formation",img:"img/alt.jpg",tag:"alternance",url:"https://recrute.francetravail.fr/page-employeur/"}
+  {name:"Mytilimer",desc:"Industrie maritime",img:"img/mytilimer.jpg",tag:"industrie",url:"#"},
+  {name:"Bâtiment Pro",desc:"Construction",img:"img/bat.jpg",tag:"batiment",url:"#"},
+  {name:"Maison Service",desc:"Aide à domicile",img:"img/aide.jpg",tag:"aide",url:"#"}
 ];
 
 let filter="all";
 const stack=document.getElementById("stack");
 
-function vibrate(){
-  if(navigator.vibrate) navigator.vibrate(20);
+function vibrate(i=1){
+  if(navigator.vibrate) navigator.vibrate(10*i);
 }
 
-/* RENDER */
+/* SWIPE PRO */
 function render(){
-  const list=companies.filter(c=>filter==="all"||c.tag===filter);
   stack.innerHTML="";
 
-  list.slice(0,5).reverse().forEach((c,i)=>{
+  const list=companies.filter(c=>filter==="all"||c.tag===filter);
+
+  list.slice(0,4).forEach((c,i)=>{
 
     const card=document.createElement("div");
     card.className="card";
 
+    let startX=0;
+    let dragging=false;
+
     const like=document.createElement("div");
-    like.className="badge like";
+    like.className="badge like-indicator";
     like.textContent="AIME";
 
     const nope=document.createElement("div");
-    nope.className="badge nope";
+    nope.className="badge nope-indicator";
     nope.textContent="PAS POUR MOI";
 
     card.appendChild(like);
     card.appendChild(nope);
 
-    card.style.transform=`scale(${1-i*0.05}) translateY(${i*10}px)`;
-    card.style.opacity=1-i*0.1;
-    card.style.filter=`blur(${i*1.5}px)`;
-
     card.innerHTML+=`
-      <img src="${c.img}" onerror="this.src='https://via.placeholder.com/400x600'">
+      <img src="${c.img}">
       <div class="content">
         <h2>${c.name}</h2>
         <p>${c.desc}</p>
       </div>
     `;
 
-    let startX=0,currentX=0,velocity=0,lastX=0,lastT=0,dragging=false;
+    card.style.transform=`scale(${1-i*0.06}) translateY(${i*12}px)`;
 
     card.addEventListener("pointerdown",e=>{
       startX=e.clientX;
-      lastX=startX;
-      lastT=Date.now();
       dragging=true;
-      card.setPointerCapture(e.pointerId);
     });
 
     card.addEventListener("pointermove",e=>{
       if(!dragging) return;
 
-      currentX=e.clientX-startX;
+      let x=e.clientX-startX;
 
-      const likeBadge=card.querySelector(".like");
-      const nopeBadge=card.querySelector(".nope");
+      card.style.transform=`translateX(${x}px) rotate(${x/20}deg)`;
 
-      if(currentX>50){
-        likeBadge.style.display="block";
-        nopeBadge.style.display="none";
-      }else if(currentX<-50){
-        nopeBadge.style.display="block";
-        likeBadge.style.display="none";
+      if(x>60){
+        like.style.display="block";
+        nope.style.display="none";
+      }else if(x<-60){
+        nope.style.display="block";
+        like.style.display="none";
       }else{
-        likeBadge.style.display="none";
-        nopeBadge.style.display="none";
+        like.style.display="none";
+        nope.style.display="none";
       }
 
-      card.style.transform=`translateX(${currentX}px) rotate(${currentX/18}deg)`;
+      vibrate(Math.min(3,Math.abs(x)/80));
     });
 
-    const end=()=>{
-      if(!dragging) return;
+    card.addEventListener("pointerup",e=>{
       dragging=false;
 
-      let finalX=currentX + velocity*150;
+      let diff=e.clientX-startX;
 
-      if(finalX>120){
-        vibrate();
-        card.style.transform="translateX(900px) rotate(30deg)";
-        setTimeout(()=>showMatch(c),200);
-      }
-      else if(finalX<-120){
-        vibrate();
-        card.style.transform="translateX(-900px) rotate(-30deg)";
-        setTimeout(()=>{
-          companies.push(companies.shift());
-          render();
-        },200);
-      }
+      if(diff>120) swipe(card,true,c);
+      else if(diff<-120) swipe(card,false,c);
       else{
         card.style.transition="0.3s";
         card.style.transform="translateX(0)";
-        setTimeout(()=>card.style.transition="",300);
+        like.style.display=nope.style.display="none";
       }
-
-      currentX=0;
-    };
-
-    card.addEventListener("pointerup",end);
-    card.addEventListener("pointercancel",end);
+    });
 
     stack.appendChild(card);
   });
 }
 
+/* SWIPE OUT */
+function swipe(card,like,c){
+
+  card.style.transition="0.4s ease";
+  card.style.transform=like
+    ?"translateX(1200px) rotate(30deg)"
+    :"translateX(-1200px) rotate(-30deg)";
+
+  vibrate(10);
+
+  setTimeout(()=>showMatch(c),300);
+}
+
 /* MATCH */
 function showMatch(c){
-  document.querySelector(".screen").style.display="none";
-  document.querySelector(".filters").style.display="none";
-  document.getElementById("match").style.display="block";
+  const m=document.getElementById("match");
+  m.classList.add("show");
 
-  document.getElementById("matchText").textContent="Match avec "+c.name;
+  document.getElementById("matchText").textContent="MATCH ! "+c.name;
   document.getElementById("companyLink").href=c.url;
 }
 
+/* RESET */
 function restart(){
-  document.getElementById("match").style.display="none";
-  document.querySelector(".screen").style.display="flex";
-  document.querySelector(".filters").style.display="flex";
+  document.getElementById("match").classList.remove("show");
   render();
 }
 
+/* FILTER */
 function setFilter(f){
   filter=f;
   document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"));
@@ -406,7 +417,6 @@ function setFilter(f){
 }
 
 render();
-
 </script>
 
 </body>
