@@ -1,3 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Match avec ton emploi</title>
+
+<style>
+:root{
+  --primary:#406BDE;
+  --bg:#DBE3FF;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:"Marianne", Verdana, Tahoma, sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  touch-action:none;
+}
+
+.bubble{
+  position:absolute;
+  bottom:-100px;
+  border-radius:50%;
+  opacity:0.35;
+  animation:rise linear infinite;
+  z-index:-1;
+  pointer-events:none;
+}
+
+@keyframes rise{
+  0%{transform:translateY(0);}
+  100%{transform:translateY(-120vh);}
+}
+
+.header-wrap{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:10;
+}
+
+.header1{
+  background:#B0BFF0;
+  text-align:center;
+  padding:14px;
+  font-weight:700;
+  font-size:22px;
+  color:#1D1E3C;
+}
+
+.header2{
+  background:white;
+  text-align:center;
+  padding:12px;
+  font-weight:700;
+  color:var(--primary);
+}
+
+.spacer{height:110px;}
+
+.filters-wrapper{margin-bottom:10px;}
+
+.filters{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  padding:15px 20px;
+}
+
+.filters button{
+  border:none;
+  padding:10px 16px;
+  border-radius:25px;
+  background:white;
+  font-weight:bold;
+}
+
+.filters .active{
+  background:var(--primary);
+  color:white;
+}
+
+.scroll-hint{
+  text-align:center;
+  font-size:12px;
+  opacity:0.6;
+}
+
+.screen{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.stack{
+  width:90vw;
+  max-width:420px;
+  height:75vh;
+  position:relative;
+}
+
+.card{
+  position:absolute;
+  width:100%;
+  height:100%;
+  border-radius:20px;
+  overflow:hidden;
+  background:white;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+.card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  position:absolute;
+}
+
+.content{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  padding:20px;
+  background:linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+}
+
+.content h2,
+.content p{
+  color:white;
+  margin:0;
+}
+
+.badge{
+  position:absolute;
+  top:40px;
+  font-size:26px;
+  font-weight:800;
+  padding:8px 14px;
+  border-radius:10px;
+  display:none;
+}
+
+.like-indicator{
+  left:20px;
+  color:#2ecc71;
+  border:2px solid #2ecc71;
+}
+
+.nope-indicator{
+  right:20px;
+  color:#e74c3c;
+  border:2px solid #e74c3c;
+}
+
+.match{
+  display:none;
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at top, #1a1a2e, #000);
+  color:white;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:20;
+  text-align:center;
+  padding:20px;
+}
+
+.match.show{display:flex;}
+
+.match h1{font-size:52px;}
+
+.match a{
+  margin-top:12px;
+  padding:14px 20px;
+  width:260px;
+  text-align:center;
+  background:#406BDE;
+  color:white;
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:700;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header-wrap">
+  <div class="header1">Match avec ton emploi</div>
+  <div class="header2">France Travail et la route du Rhum</div>
+</div>
+
+<div class="spacer"></div>
+
+<div class="filters-wrapper">
+  <div class="filters" id="filters">
+    <button class="active" onclick="setFilter('all')">Tous</button>
+  </div>
+</div>
+
+<div class="scroll-hint">👉 Glisse pour voir toutes les catégories</div>
+
+<div class="screen">
+  <div class="stack" id="stack"></div>
+</div>
+
+<div class="match" id="match">
+  <h1 id="matchText">MATCH !</h1>
+  <a href="https://recrute.francetravail.fr/page-employeur/" target="_blank">France Travail</a>
+  <a id="companyLink" href="#" target="_blank">Entreprise</a>
+  <button onclick="restart()">Retour</button>
+</div>
+
 <script>
 
 /* BULLES */
@@ -11,10 +234,16 @@ for(let i=0;i<20;i++){
   document.body.appendChild(b);
 }
 
-/* DATA */
+/* STATE */
 let data = {};
+let filter = "all";
 
-/* 🔗 CHARGEMENT GOOGLE SHEET */
+/* INIT SAFE */
+window.addEventListener("DOMContentLoaded", () => {
+  loadData();
+});
+
+/* GOOGLE SHEET */
 async function loadData(){
 
   try {
@@ -23,204 +252,124 @@ async function loadData(){
 
     const text = await res.text();
 
-    const rows = text.split("\n").slice(1);
+    const rows = text.split("\n").map(r => r.trim()).filter(Boolean);
 
     data = {};
 
-    rows.forEach(row => {
+    for(let i=1;i<rows.length;i++){
 
-      if(!row.trim()) return;
+      const cols = rows[i].split(",");
 
-      const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+      const c = cols[0];
+      const n = cols[1];
+      const d = cols[2];
+      const img = cols[3];
+      const url = cols[4];
 
-      const categorie = cols[0]?.trim();
-      const name = cols[1]?.trim();
-      const desc = cols[2]?.trim();
-      const img = cols[3]?.trim();
-      const url = cols[4]?.trim();
+      if(!c || !n) continue;
 
-      if(!categorie || !name) return;
+      if(!data[c]) data[c] = [];
 
-      if(!data[categorie]) data[categorie] = [];
+      data[c].push({name:n,desc:d,img,url});
+    }
 
-      data[categorie].push({
-        name,
-        desc,
-        img,
-        url
-      });
-
-    });
-
-    console.log("DATA LOAD OK :", data);
+    console.log("DATA OK", data);
 
     render();
 
-  } catch (e) {
-    console.error("Erreur chargement Google Sheet :", e);
+  } catch(e){
+    console.error("Sheet error", e);
   }
-}
-
-loadData();
-
-let filter="all";
-const stack=document.getElementById("stack");
-
-/* vibration */
-function vibrate(i=1){
-  if(navigator.vibrate) navigator.vibrate(10*i);
 }
 
 /* RENDER */
 function render(){
 
+  const stack = document.getElementById("stack");
   if(!stack) return;
 
-  stack.innerHTML="";
+  stack.innerHTML = "";
 
-  let list=[];
+  let list = [];
 
-  if(filter==="all"){
-    Object.values(data).forEach(arr=>{
-      list = list.concat(arr);
-    });
-  }else{
+  if(filter === "all"){
+    Object.values(data).forEach(a => list = list.concat(a));
+  } else {
     list = data[filter] || [];
   }
 
   if(list.length === 0){
-    stack.innerHTML = "<p style='color:#333'>Chargement ou aucune donnée...</p>";
+    stack.innerHTML = "<p>Chargement...</p>";
     return;
   }
 
   list.slice(0,4).forEach((c,i)=>{
 
-    const card=document.createElement("div");
+    const card = document.createElement("div");
     card.className="card";
 
-    const like=document.createElement("div");
+    const like = document.createElement("div");
     like.className="badge like-indicator";
     like.textContent="AIME";
 
-    const nope=document.createElement("div");
+    const nope = document.createElement("div");
     nope.className="badge nope-indicator";
     nope.textContent="PAS POUR MOI";
 
     card.appendChild(like);
     card.appendChild(nope);
 
-    card.innerHTML+=`
-      <img src="${c.img || ''}" onerror="this.src='img/default.jpg'">
+    card.innerHTML += `
+      <img src="${c.img}">
       <div class="content">
-        <h2>${c.name || ''}</h2>
-        <p>${c.desc || ''}</p>
+        <h2>${c.name}</h2>
+        <p>${c.desc}</p>
       </div>
     `;
 
-    card.style.transform=`scale(${1-i*0.06}) translateY(${i*12}px)`;
+    let startX=0,drag=false;
 
-    let startX=0;
-    let dragging=false;
-
-    card.addEventListener("pointerdown",e=>{
+    card.onpointerdown=e=>{
       startX=e.clientX;
-      dragging=true;
-    });
+      drag=true;
+    };
 
-    card.addEventListener("pointermove",e=>{
-      if(!dragging) return;
+    card.onpointermove=e=>{
+      if(!drag) return;
+      let x=e.clientX-startX;
+      card.style.transform=`translateX(${x}px) rotate(${x/20}deg)`;
+    };
 
+    card.onpointerup=e=>{
+      drag=false;
       let x=e.clientX-startX;
 
-      card.style.transform=`translateX(${x}px) rotate(${x/20}deg)`;
-
-      if(x>60){
-        like.style.display="block";
-        nope.style.display="none";
-      }else if(x<-60){
-        nope.style.display="block";
-        like.style.display="none";
-      }else{
-        like.style.display="none";
-        nope.style.display="none";
-      }
-
-      vibrate(Math.min(3,Math.abs(x)/80));
-    });
-
-    card.addEventListener("pointerup",e=>{
-      dragging=false;
-
-      let diff=e.clientX-startX;
-
-      if(diff>120){
-        swipeRight(card,c);
-      }
-      else if(diff<-120){
-        swipeLeft(card);
-      }
-      else{
-        card.style.transition="0.3s";
-        card.style.transform="translateX(0)";
-        like.style.display=nope.style.display="none";
-      }
-    });
+      if(x>120) swipeRight(card,c);
+      else if(x<-120) swipeLeft(card);
+      else card.style.transform="translateX(0)";
+    };
 
     stack.appendChild(card);
   });
 }
 
-/* 👉 MATCH */
+/* SWIPE */
 function swipeRight(card,c){
-
-  card.style.transition="0.4s ease";
-  card.style.transform="translateX(1200px) rotate(30deg)";
-
-  vibrate(15);
-
-  setTimeout(()=>{
-    alertMatch(c);
-  },250);
+  card.style.transform="translateX(1200px)";
+  setTimeout(()=>alertMatch(c),300);
 }
 
-/* ❌ PAS POUR MOI */
 function swipeLeft(card){
-
-  card.style.transition="0.4s ease";
-  card.style.transform="translateX(-1200px) rotate(-30deg)";
-
-  vibrate(8);
-
-  const stamp=document.createElement("div");
-  stamp.textContent="PAS POUR MOI";
-  stamp.style.position="absolute";
-  stamp.style.top="40%";
-  stamp.style.left="50%";
-  stamp.style.transform="translate(-50%,-50%) rotate(-15deg)";
-  stamp.style.background="#e74c3c";
-  stamp.style.color="white";
-  stamp.style.padding="10px 18px";
-  stamp.style.borderRadius="10px";
-  stamp.style.fontWeight="800";
-  stamp.style.fontSize="22px";
-  stamp.style.zIndex="10";
-
-  card.appendChild(stamp);
-
-  setTimeout(()=>{
-    render();
-  },400);
+  card.style.transform="translateX(-1200px)";
+  setTimeout(()=>render(),300);
 }
 
-/* MATCH UI */
+/* MATCH */
 function alertMatch(c){
   const m=document.getElementById("match");
-  if(!m) return;
-
   m.classList.add("show");
-
   document.getElementById("matchText").textContent="MATCH ! "+c.name;
-  document.getElementById("companyLink").href=c.url;
+  document.getElementById("companyLink").href=c.url || "#";
 }
 
 /* RESET */
@@ -232,11 +381,10 @@ function restart(){
 /* FILTER */
 function setFilter(f){
   filter=f;
-  document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"));
-  event.target.classList.add("active");
   render();
 }
 
 </script>
+
 </body>
 </html>
