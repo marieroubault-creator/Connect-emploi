@@ -17,40 +17,48 @@ let data = {};
 /* 🔗 CHARGEMENT GOOGLE SHEET */
 async function loadData(){
 
-  const res = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSM_YU-q5RRw9vsihxuJaZ-kStFXupQ9bt_dcBXy3-rkIKQj297iAQXyJ_6DcuFkw4XEDRkyZhfEH7a/pub?output=csv");
-  
-  const text = await res.text();
+  try {
 
-  const rows = text.split("\n").slice(1);
+    const res = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSM_YU-q5RRw9vsihxuJaZ-kStFXupQ9bt_dcBXy3-rkIKQj297iAQXyJ_6DcuFkw4XEDRkyZhfEH7a/pub?output=csv");
 
-  data = {};
+    const text = await res.text();
 
-  rows.forEach(row => {
+    const rows = text.split("\n").slice(1);
 
-    if(!row.trim()) return;
+    data = {};
 
-    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+    rows.forEach(row => {
 
-    const categorie = cols[0]?.trim();
-    const name = cols[1]?.trim();
-    const desc = cols[2]?.trim();
-    const img = cols[3]?.trim();
-    const url = cols[4]?.trim();
+      if(!row.trim()) return;
 
-    if(!categorie) return;
+      const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
-    if(!data[categorie]) data[categorie] = [];
+      const categorie = cols[0]?.trim();
+      const name = cols[1]?.trim();
+      const desc = cols[2]?.trim();
+      const img = cols[3]?.trim();
+      const url = cols[4]?.trim();
 
-    data[categorie].push({
-      name,
-      desc,
-      img,
-      url
+      if(!categorie || !name) return;
+
+      if(!data[categorie]) data[categorie] = [];
+
+      data[categorie].push({
+        name,
+        desc,
+        img,
+        url
+      });
+
     });
 
-  });
+    console.log("DATA LOAD OK :", data);
 
-  render();
+    render();
+
+  } catch (e) {
+    console.error("Erreur chargement Google Sheet :", e);
+  }
 }
 
 loadData();
@@ -66,13 +74,23 @@ function vibrate(i=1){
 /* RENDER */
 function render(){
 
+  if(!stack) return;
+
   stack.innerHTML="";
 
   let list=[];
+
   if(filter==="all"){
-    Object.values(data).forEach(arr=>list=list.concat(arr));
+    Object.values(data).forEach(arr=>{
+      list = list.concat(arr);
+    });
   }else{
-    list=data[filter]||[];
+    list = data[filter] || [];
+  }
+
+  if(list.length === 0){
+    stack.innerHTML = "<p style='color:#333'>Chargement ou aucune donnée...</p>";
+    return;
   }
 
   list.slice(0,4).forEach((c,i)=>{
@@ -92,10 +110,10 @@ function render(){
     card.appendChild(nope);
 
     card.innerHTML+=`
-      <img src="${c.img}">
+      <img src="${c.img || ''}" onerror="this.src='img/default.jpg'">
       <div class="content">
-        <h2>${c.name}</h2>
-        <p>${c.desc}</p>
+        <h2>${c.name || ''}</h2>
+        <p>${c.desc || ''}</p>
       </div>
     `;
 
@@ -197,6 +215,8 @@ function swipeLeft(card){
 /* MATCH UI */
 function alertMatch(c){
   const m=document.getElementById("match");
+  if(!m) return;
+
   m.classList.add("show");
 
   document.getElementById("matchText").textContent="MATCH ! "+c.name;
@@ -218,5 +238,3 @@ function setFilter(f){
 }
 
 </script>
-</body>
-</html>
