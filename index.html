@@ -107,7 +107,7 @@ body{
   object-fit:cover;
 }
 
-/* OVERLAY */
+/* OVERLAY SWIPE */
 .content{
   position:absolute;
   bottom:0;
@@ -140,33 +140,43 @@ body{
 .nope{background:#e74c3c;}
 .like{background:#2ecc71;}
 
-/* MATCH (OVERLAY CINEMA BLANC) */
-/* MATCH CINEMA PRO */
+/* =========================
+   MATCH OVERLAY (NEW DESIGN)
+========================= */
+
 .match{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(255,255,255,0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color:#1d1e3c;
+  background:rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   justify-content:center;
   align-items:center;
   flex-direction:column;
-  gap:16px;
+  gap:18px;
   text-align:center;
   z-index:999;
   padding:30px;
+}
+
+/* cartes en arrière plan flou */
+.match.show ~ .screen,
+.match.show ~ .filters,
+.match.show ~ .header-wrap{
+  opacity:0.25;
+  filter:blur(6px);
+  transition:0.3s ease;
 }
 
 .match.show{
   display:flex;
 }
 
-/* HANDSHAKE */
+/* poignée de main */
 .handshake{
-  width:140px;
-  height:140px;
+  width:130px;
+  height:130px;
   background:url("https://cdn-icons-png.flaticon.com/512/3050/3050525.png") center/contain no-repeat;
   animation:pop 0.5s ease;
 }
@@ -177,122 +187,25 @@ body{
   100%{transform:scale(1);}
 }
 
-/* TITRE */
+/* titre */
 #matchText{
-  font-size:40px;
+  font-size:38px;
   font-weight:800;
+  color:#1d1e3c;
+  margin:0;
 }
 
-/* BOUTONS MATCH */
+/* BOUTONS MATCH (UNIQUES DEMANDÉS) */
 .match a{
-  width:280px;
-  padding:14px 18px;
+  width:260px;
+  padding:14px 16px;
   border-radius:14px;
   text-decoration:none;
   font-weight:700;
   display:block;
-}
-
-/* FRANCE TRAVAIL */
-.ft-btn{
-  background:#406BDE;
-  color:white;
-}
-
-/* ENTREPRISE */
-.company-btn{
-  background:#2ecc71;
-  color:white;
-}
-
-/* BTN CONTINUER */
-.match button{
-  padding:10px 16px;
-  border:none;
-  border-radius:10px;
-  background:#e74c3c;
-  color:white;
-  font-weight:700;
-}
-
-/* TITRE MATCH */
-#matchText{
-  font-size:42px;
-  font-weight:800;
-  color:#1d1e3c;
-  margin:10px 0;
-}
-
-/* HANDSHAKE ANIMATION */
-.handshake{
-  width:140px;
-  height:140px;
-  background:url("https://cdn-icons-png.flaticon.com/512/3050/3050525.png") center/contain no-repeat;
-  animation:pop 0.6s ease;
-}
-
-@keyframes pop{
-  0%{transform:scale(0);}
-  70%{transform:scale(1.2);}
-  100%{transform:scale(1);}
-}
-
-/* BOUTONS MATCH */
-.match a{
-  width:280px;
-  padding:14px 18px;
-  border-radius:14px;
-  text-decoration:none;
-  font-weight:700;
-  display:inline-block;
   text-align:center;
-}
-
-/* BLEU FRANCE TRAVAIL */
-.ft-btn{
-  background:#406BDE;
+  background:var(--primary);
   color:white;
-}
-
-/* bouton entreprise */
-.company-btn{
-  background:#2ecc71;
-  color:white;
-}
-
-/* bouton retour */
-.match button{
-  margin-top:10px;
-  padding:10px 16px;
-  border:none;
-  border-radius:10px;
-  background:#e74c3c;
-  color:white;
-  font-weight:700;
-}
-
-.match.show{display:flex;}
-  .overlay{
-  position:absolute;
-  inset:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:42px;
-  font-weight:800;
-  opacity:0;
-  transition:0.2s ease;
-  z-index:5;
-}
-
-.overlay.like{
-  background:rgba(46, 204, 113, 0.25);
-  color:#2ecc71;
-}
-
-.overlay.nope{
-  background:rgba(231, 76, 60, 0.25);
-  color:#e74c3c;
 }
 </style>
 </head>
@@ -442,28 +355,12 @@ function render(){
     card.style.transition = "none";
   });
 
-card.addEventListener("pointermove", e=>{
-  if(!dragging) return;
+  card.addEventListener("pointermove", e=>{
+    if(!dragging) return;
 
-  let diff = e.clientX - startX;
-  card.style.transform = `translateX(${diff}px) rotate(${diff/12}deg)`;
-
-  const like = card.querySelector(".like");
-  const nope = card.querySelector(".nope");
-
-  if(diff > 40){
-    like.style.opacity = Math.min(diff / 150, 1);
-    nope.style.opacity = 0;
-  }
-  else if(diff < -40){
-    nope.style.opacity = Math.min(Math.abs(diff) / 150, 1);
-    like.style.opacity = 0;
-  }
-  else{
-    like.style.opacity = 0;
-    nope.style.opacity = 0;
-  }
-});
+    let diff = e.clientX - startX;
+    card.style.transform = `translateX(${diff}px) rotate(${diff/12}deg)`;
+  });
 
   card.addEventListener("pointerup", e=>{
     if(!dragging) return;
@@ -505,17 +402,12 @@ function swipe(dir){
   currentIndex++;
 
   setTimeout(()=>{
-
-    if(dir==="right"){
-      showMatch(c);
-    } else {
-      render();
-    }
-
+    if(dir==="right") showMatch(c);
+    else render();
   },300);
 }
 
-/* 🔥 MATCH PROPRE */
+/* MATCH FINAL CLEAN */
 function showMatch(c){
 
   const m=document.getElementById("match");
@@ -525,30 +417,23 @@ function showMatch(c){
 
     <h1 id="matchText">MATCH avec ${c.name}</h1>
 
-    <a class="ft-btn"
-       href="https://recrute.francetravail.fr/page-employeur/"
-       target="_blank">
-       🔵 Offres France Travail
+    <a href="https://recrute.francetravail.fr/page-employeur/" target="_blank">
+      Offres France Travail
     </a>
 
-    <a class="company-btn"
-       href="${c.url || "#"}"
-       target="_blank">
-       🏢 Site de l'entreprise
+    <a href="${c.url || "#"}" target="_blank">
+      Site de l'entreprise
     </a>
-
-    <button onclick="restart()">Continuer</button>
   `;
 
   m.classList.add("show");
 }
 
-/* BUTTONS */
+/* RESET */
 function forceSwipe(dir){
   swipe(dir);
 }
 
-/* RESET */
 function restart(){
   document.getElementById("match").classList.remove("show");
   render();
