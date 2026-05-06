@@ -24,6 +24,10 @@ body{
   flex-direction:column;
 }
 
+html, body{
+  height:100%;
+}
+  
 /* HEADER */
 .header-wrap{
   position:fixed;
@@ -158,31 +162,36 @@ body{
   position:fixed;
   inset:0;
 
-  /* centre parfait tablette */
-  align-items:center;
-  justify-content:center;
+  /* ⭐ FIX TABLETTE / MOBILE MODERNE */
+  min-height:100dvh;
+  min-height:100vh;
+
+  width:100%;
+  height:100%;
 
   background:rgba(255,255,255,0.92);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 
+  justify-content:center;
+  align-items:center;
   flex-direction:column;
-  gap:16px;
 
+  gap:16px;
   text-align:center;
   z-index:999;
 
-  padding:20px;
+  /* ⭐ IMPORTANT */
+  padding:clamp(12px, 3vw, 30px);
 
-  /* ⭐ FIX IMPORTANT */
-  min-height:100dvh;
   overflow:hidden;
 
-  transform:scale(0.9);
+  transform:scale(0.92);
   opacity:0;
   transition:all 0.35s ease;
 }
 
+/* état visible */
 .match.show{
   display:flex;
   transform:scale(1);
