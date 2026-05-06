@@ -107,7 +107,7 @@ body{
   object-fit:cover;
 }
 
-/* OVERLAY SWIPE */
+/* CONTENT */
 .content{
   position:absolute;
   bottom:0;
@@ -140,10 +140,7 @@ body{
 .nope{background:#e74c3c;}
 .like{background:#2ecc71;}
 
-/* =========================
-   MATCH OVERLAY (NEW DESIGN)
-========================= */
-
+/* MATCH */
 .match{
   display:none;
   position:fixed;
@@ -158,54 +155,80 @@ body{
   text-align:center;
   z-index:999;
   padding:30px;
-}
 
-/* cartes en arrière plan flou */
-.match.show ~ .screen,
-.match.show ~ .filters,
-.match.show ~ .header-wrap{
-  opacity:0.25;
-  filter:blur(6px);
-  transition:0.3s ease;
+  transform:scale(0.8);
+  opacity:0;
+  transition:all 0.35s ease;
 }
 
 .match.show{
   display:flex;
+  transform:scale(1);
+  opacity:1;
 }
 
-/* poignée de main */
+/* OVERLAY CINÉMA FLASH */
+.match.flash{
+  animation:flash 0.6s ease;
+}
+
+@keyframes flash{
+  0%{background:rgba(255,255,255,1);}
+  50%{background:rgba(64,107,222,0.15);}
+  100%{background:rgba(255,255,255,0.92);}
+}
+
+/* 🤝 HANDSHAKE */
 .handshake{
-  width:130px;
-  height:130px;
-  background:url("https://cdn-icons-png.flaticon.com/512/3050/3050525.png") center/contain no-repeat;
-  animation:pop 0.5s ease;
+  font-size:90px;
+  animation:pop 0.6s ease;
 }
 
 @keyframes pop{
   0%{transform:scale(0);}
-  70%{transform:scale(1.2);}
+  70%{transform:scale(1.3);}
   100%{transform:scale(1);}
 }
 
-/* titre */
+/* TITRE */
 #matchText{
-  font-size:38px;
+  font-size:42px;
   font-weight:800;
   color:#1d1e3c;
-  margin:0;
 }
 
-/* BOUTONS MATCH (UNIQUES DEMANDÉS) */
+/* BOUTONS MATCH */
 .match a{
-  width:260px;
-  padding:14px 16px;
+  width:280px;
+  padding:14px 18px;
   border-radius:14px;
   text-decoration:none;
   font-weight:700;
   display:block;
   text-align:center;
-  background:var(--primary);
+}
+
+/* BLEU FRANCE TRAVAIL */
+.ft-btn{
+  background:#406BDE;
   color:white;
+}
+
+/* bouton entreprise */
+.company-btn{
+  background:#406BDE;
+  color:white;
+}
+
+/* bouton retour */
+.match button{
+  margin-top:10px;
+  padding:10px 16px;
+  border:none;
+  border-radius:10px;
+  background:#e74c3c;
+  color:white;
+  font-weight:700;
 }
 </style>
 </head>
@@ -241,7 +264,6 @@ let data = {};
 let currentList = [];
 let currentIndex = 0;
 
-/* LOAD DATA */
 async function loadData(){
   const res = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSM_YU-q5RRw9vsihxuJaZ-kStFXupQ9bt_dcBXy3-rkIKQj297iAQXyJ_6DcuFkw4XEDRkyZhfEH7a/pub?output=csv");
   const text = await res.text();
@@ -266,9 +288,8 @@ async function loadData(){
   setFilter("all");
 }
 
-/* FILTERS */
+/* FILTRES */
 function buildFilters(){
-
   const container = document.getElementById("filters");
   container.innerHTML = "";
 
@@ -284,27 +305,22 @@ function buildFilters(){
   function setActive(btn){
     document.querySelectorAll(".filters button")
       .forEach(b=>b.classList.remove("active"));
-
     btn.classList.add("active");
   }
 
   container.appendChild(allBtn);
 
-  Object.keys(data).forEach(cat => {
-
-    const btn = document.createElement("button");
-    btn.textContent = cat;
-
-    btn.onclick = (e) => {
+  Object.keys(data).forEach(cat=>{
+    const btn=document.createElement("button");
+    btn.textContent=cat;
+    btn.onclick=(e)=>{
       setFilter(cat);
       setActive(e.target);
     };
-
     container.appendChild(btn);
   });
 }
 
-/* FILTER */
 function setFilter(cat){
   currentList = [];
 
@@ -318,7 +334,6 @@ function setFilter(cat){
   render();
 }
 
-/* RENDER */
 function render(){
   const stack=document.getElementById("stack");
   stack.innerHTML="";
@@ -334,9 +349,6 @@ function render(){
   card.className="card";
 
   card.innerHTML=`
-  <div class="overlay like">❤️ LIKE</div>
-  <div class="overlay nope">❌ NOPE</div>
-
   <img src="${c.img}">
   <div class="content">
     <h2>${c.name}</h2>
@@ -344,42 +356,30 @@ function render(){
   </div>
 `;
 
-  let startX = 0;
-  let dragging = false;
+  let startX=0;
+  let dragging=false;
 
-  card.addEventListener("pointerdown", e=>{
-    startX = e.clientX;
-    dragging = true;
-
+  card.addEventListener("pointerdown",e=>{
+    startX=e.clientX;
+    dragging=true;
     card.setPointerCapture(e.pointerId);
-    card.style.transition = "none";
+    card.style.transition="none";
   });
 
-  card.addEventListener("pointermove", e=>{
+  card.addEventListener("pointermove",e=>{
     if(!dragging) return;
-
-    let diff = e.clientX - startX;
-    card.style.transform = `translateX(${diff}px) rotate(${diff/12}deg)`;
+    let diff=e.clientX-startX;
+    card.style.transform=`translateX(${diff}px) rotate(${diff/12}deg)`;
   });
 
-  card.addEventListener("pointerup", e=>{
-    if(!dragging) return;
+  card.addEventListener("pointerup",e=>{
+    dragging=false;
+    let diff=e.clientX-startX;
+    card.style.transition="0.3s ease";
 
-    dragging = false;
-    card.releasePointerCapture(e.pointerId);
-
-    let diff = e.clientX - startX;
-    card.style.transition = "0.3s ease";
-
-    if(diff > 100){
-      swipe("right");
-    }
-    else if(diff < -100){
-      swipe("left");
-    }
-    else{
-      card.style.transform = "translateX(0)";
-    }
+    if(diff>100) swipe("right");
+    else if(diff<-100) swipe("left");
+    else card.style.transform="translateX(0)";
   });
 
   stack.appendChild(card);
@@ -391,10 +391,8 @@ function swipe(dir){
   if(!card) return;
 
   const c=currentList[currentIndex];
-  if(!c) return;
 
   card.style.transition="0.3s ease";
-
   card.style.transform = dir==="right"
     ? "translateX(1200px) rotate(20deg)"
     : "translateX(-1200px) rotate(-20deg)";
@@ -402,34 +400,46 @@ function swipe(dir){
   currentIndex++;
 
   setTimeout(()=>{
-    if(dir==="right") showMatch(c);
-    else render();
+    if(dir==="right"){
+      showMatch(c);
+    }else render();
   },300);
 }
 
-/* MATCH FINAL CLEAN */
+/* 🔥 MATCH CINÉMA ++ */
 function showMatch(c){
+
+  // 🔊 son
+  const audio = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3");
+  audio.play();
+
+  // 📳 vibration
+  if(navigator.vibrate){
+    navigator.vibrate([200,100,200]);
+  }
 
   const m=document.getElementById("match");
 
-  m.innerHTML = `
-    <div class="handshake"></div>
+  m.innerHTML=`
+    <div class="handshake">🤝</div>
 
     <h1 id="matchText">MATCH avec ${c.name}</h1>
 
-    <a href="https://recrute.francetravail.fr/page-employeur/" target="_blank">
+    <a class="ft-btn" href="https://recrute.francetravail.fr/page-employeur/" target="_blank">
       Offres France Travail
     </a>
 
-    <a href="${c.url || "#"}" target="_blank">
+    <a class="company-btn" href="${c.url||"#"}" target="_blank">
       Site de l'entreprise
     </a>
+
+    <button onclick="restart()">Continuer</button>
   `;
 
-  m.classList.add("show");
+  m.classList.add("show","flash");
+  setTimeout(()=>m.classList.remove("flash"),700);
 }
 
-/* RESET */
 function forceSwipe(dir){
   swipe(dir);
 }
