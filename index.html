@@ -264,7 +264,7 @@ function setFilter(cat){
   render();
 }
 
-/* RENDER (FIX SWIPE TABLET + MOBILE) */
+/* RENDER */
 function render(){
   const stack=document.getElementById("stack");
   stack.innerHTML="";
@@ -334,6 +334,7 @@ function swipe(dir){
   if(!card) return;
 
   const c=currentList[currentIndex];
+  if(!c) return;
 
   card.style.transition="0.3s ease";
 
@@ -344,21 +345,53 @@ function swipe(dir){
   currentIndex++;
 
   setTimeout(()=>{
-    if(dir==="right") alertMatch(c);
-    else render();
+
+    if(dir==="right"){
+      showMatch(c);
+    } else {
+      render();
+    }
+
   },300);
+}
+
+/* 🔥 MATCH PROPRE */
+function showMatch(c){
+
+  const m=document.getElementById("match");
+
+  document.getElementById("matchText").textContent =
+    "MATCH avec " + c.name;
+
+  // bouton entreprise dynamique
+  let companyBtn = document.getElementById("companyBtn");
+
+  if(!companyBtn){
+    companyBtn = document.createElement("a");
+    companyBtn.id = "companyBtn";
+    companyBtn.target = "_blank";
+    companyBtn.style.marginTop = "12px";
+    companyBtn.style.padding = "14px 20px";
+    companyBtn.style.width = "260px";
+    companyBtn.style.textAlign = "center";
+    companyBtn.style.background = "#2ecc71";
+    companyBtn.style.color = "white";
+    companyBtn.style.borderRadius = "12px";
+    companyBtn.style.textDecoration = "none";
+    companyBtn.style.fontWeight = "700";
+
+    m.appendChild(companyBtn);
+  }
+
+  companyBtn.href = c.url || "#";
+  companyBtn.textContent = "Voir l'entreprise";
+
+  m.classList.add("show");
 }
 
 /* BUTTONS */
 function forceSwipe(dir){
   swipe(dir);
-}
-
-/* MATCH */
-function alertMatch(c){
-  const m=document.getElementById("match");
-  m.classList.add("show");
-  document.getElementById("matchText").textContent="MATCH avec "+c.name;
 }
 
 /* RESET */
