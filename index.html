@@ -261,6 +261,38 @@ function render(){
     </div>
   `;
 
+  let startX = 0;
+  let isDragging = false;
+
+  card.addEventListener("pointerdown", e=>{
+    startX = e.clientX;
+    isDragging = true;
+  });
+
+  card.addEventListener("pointermove", e=>{
+    if(!isDragging) return;
+
+    let diff = e.clientX - startX;
+
+    card.style.transform = `translateX(${diff}px) rotate(${diff/15}deg)`;
+  });
+
+  card.addEventListener("pointerup", e=>{
+    isDragging = false;
+
+    let diff = e.clientX - startX;
+
+    if(diff > 120){
+      swipe("right");
+    }
+    else if(diff < -120){
+      swipe("left");
+    }
+    else{
+      card.style.transform = "translateX(0)";
+    }
+  });
+
   stack.appendChild(card);
 }
 
