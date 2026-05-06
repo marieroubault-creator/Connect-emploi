@@ -141,15 +141,79 @@ body{
 .like{background:#2ecc71;}
 
 /* MATCH */
+/* MATCH (OVERLAY CINEMA BLANC) */
 .match{
   display:none;
   position:fixed;
   inset:0;
-  background:black;
-  color:white;
+  background:rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  color:#1d1e3c;
   justify-content:center;
   align-items:center;
   flex-direction:column;
+  gap:18px;
+  text-align:center;
+  z-index:999;
+  padding:30px;
+}
+
+.match.show{display:flex;}
+
+/* TITRE MATCH */
+#matchText{
+  font-size:42px;
+  font-weight:800;
+  color:#1d1e3c;
+  margin:10px 0;
+}
+
+/* HANDSHAKE ANIMATION */
+.handshake{
+  width:140px;
+  height:140px;
+  background:url("https://cdn-icons-png.flaticon.com/512/3050/3050525.png") center/contain no-repeat;
+  animation:pop 0.6s ease;
+}
+
+@keyframes pop{
+  0%{transform:scale(0);}
+  70%{transform:scale(1.2);}
+  100%{transform:scale(1);}
+}
+
+/* BOUTONS MATCH */
+.match a{
+  width:280px;
+  padding:14px 18px;
+  border-radius:14px;
+  text-decoration:none;
+  font-weight:700;
+  display:inline-block;
+  text-align:center;
+}
+
+/* BLEU FRANCE TRAVAIL */
+.ft-btn{
+  background:#406BDE;
+  color:white;
+}
+
+/* bouton entreprise */
+.company-btn{
+  background:#2ecc71;
+  color:white;
+}
+
+/* bouton retour */
+.match button{
+  margin-top:10px;
+  padding:10px 16px;
+  border:none;
+  border-radius:10px;
+  background:#e74c3c;
+  color:white;
+  font-weight:700;
 }
 
 .match.show{display:flex;}
@@ -401,31 +465,25 @@ function showMatch(c){
 
   const m=document.getElementById("match");
 
-  document.getElementById("matchText").textContent =
-    "MATCH avec " + c.name;
+  m.innerHTML = `
+    <div class="handshake"></div>
 
-  // bouton entreprise dynamique
-  let companyBtn = document.getElementById("companyBtn");
+    <h1 id="matchText">MATCH avec ${c.name}</h1>
 
-  if(!companyBtn){
-    companyBtn = document.createElement("a");
-    companyBtn.id = "companyBtn";
-    companyBtn.target = "_blank";
-    companyBtn.style.marginTop = "12px";
-    companyBtn.style.padding = "14px 20px";
-    companyBtn.style.width = "260px";
-    companyBtn.style.textAlign = "center";
-    companyBtn.style.background = "#2ecc71";
-    companyBtn.style.color = "white";
-    companyBtn.style.borderRadius = "12px";
-    companyBtn.style.textDecoration = "none";
-    companyBtn.style.fontWeight = "700";
+    <a class="ft-btn"
+       href="https://recrute.francetravail.fr/page-employeur/"
+       target="_blank">
+       🔵 Offres France Travail
+    </a>
 
-    m.appendChild(companyBtn);
-  }
+    <a class="company-btn"
+       href="${c.url || "#"}"
+       target="_blank">
+       🏢 Site de l'entreprise
+    </a>
 
-  companyBtn.href = c.url || "#";
-  companyBtn.textContent = "Voir l'entreprise";
+    <button onclick="restart()">Continuer</button>
+  `;
 
   m.classList.add("show");
 }
