@@ -81,8 +81,9 @@ body{
 
 /* CARD STACK */
 .stack{
-  width:300px;
-  height:420px;
+  width:90vw;
+  max-width:380px;
+  height:70vh;
   position:relative;
 }
 
@@ -212,15 +213,39 @@ async function loadData(){
 
 /* FILTERS */
 function buildFilters(){
-  const f = document.getElementById("filters");
 
-  f.innerHTML = `<button onclick="setFilter('all')">Tous</button>`;
+  const container = document.getElementById("filters");
+  container.innerHTML = "";
 
-  Object.keys(data).forEach(cat=>{
-    const b=document.createElement("button");
-    b.textContent=cat;
-    b.onclick=()=>setFilter(cat);
-    f.appendChild(b);
+  const allBtn = document.createElement("button");
+  allBtn.textContent = "Tous";
+  allBtn.classList.add("active");
+
+  allBtn.onclick = (e)=>{
+    setFilter("all");
+    setActive(e.target);
+  };
+  
+  function setActive(btn){
+  document.querySelectorAll(".filters button")
+    .forEach(b=>b.classList.remove("active"));
+
+  btn.classList.add("active");
+}
+
+  container.appendChild(allBtn);
+
+  Object.keys(data).forEach(cat => {
+
+    const btn = document.createElement("button");
+    btn.textContent = cat;
+
+    btn.onclick = (e) => {
+      setFilter(cat);
+      setActive(e.target);
+    };
+
+    container.appendChild(btn);
   });
 }
 
@@ -267,6 +292,7 @@ function render(){
   card.addEventListener("pointerdown", e=>{
     startX = e.clientX;
     isDragging = true;
+    card.style.transition = "none"; // important
   });
 
   card.addEventListener("pointermove", e=>{
@@ -274,19 +300,26 @@ function render(){
 
     let diff = e.clientX - startX;
 
-    card.style.transform = `translateX(${diff}px) rotate(${diff/15}deg)`;
+    card.style.transform = `translateX(${diff}px) rotate(${diff/10}deg)`;
   });
 
   card.addEventListener("pointerup", e=>{
-    isDragging = false;
+    if(!isDragging) return;
 
+    isDragging = false;
     let diff = e.clientX - startX;
 
-    if(diff > 120){
-      swipe("right");
+    card.style.transition = "0.3s ease";
+
+    if(diff > 100){
+      card.style.transform = "translateX(1000px) rotate(25deg)";
+      currentIndex++;
+      setTimeout(()=>alertMatch(c),300);
     }
-    else if(diff < -120){
-      swipe("left");
+    else if(diff < -100){
+      card.style.transform = "translateX(-1000px) rotate(-25deg)";
+      currentIndex++;
+      setTimeout(()=>render(),300);
     }
     else{
       card.style.transform = "translateX(0)";
