@@ -2,7 +2,7 @@
   "name": "Match avec ton emploi",
   "short_name": "Match Emploi",
   "description": "Découvre des métiers grâce au swipe.",
-  "start_url": "./",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1D1E3C",
