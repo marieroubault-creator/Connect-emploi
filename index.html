@@ -821,7 +821,7 @@ async function loadData(){
     const c=parseCSVRow(r);
     if(!c[0]) return;
     if(!data[c[0]]) data[c[0]]=[];
-    const imgPath = c[3] ? c[3].replace(/^img\//,'https://marieroubault-creator.github.io/Match-emploi/img/') : '';
+    const imgPath = c[3] ? c[3].replace(/^img\//,'https://marieroubault-creator.github.io/Connect-emploi/img/') : '';
     data[c[0]].push({name:c[1],desc:c[2],img:imgPath,url:c[4],ftUrl:c[5]});
   });
   buildFilters();
